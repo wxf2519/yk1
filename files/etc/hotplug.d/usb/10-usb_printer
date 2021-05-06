@@ -1,0 +1,111 @@
+#!/bin/sh
+
+set -e
+FRM_CAT=/etc/hp/
+DEVICE=/dev/usb/lp0
+LOGFILE=/tmp/hp
+
+
+LJ_1000=3f0/517/100
+LJ_1005=3f0/1317/100
+LJ_1018=3f0/4117/100
+LJ_1020=3f0/2b17/100
+LJ_1022=3f0/2c17/100
+LJ_1022n=3f0/2d17/100
+LJ_1022nw=3f0/3017/100
+LJ_P1005=3f0/3d17/100
+LJ_P1006=3f0/3e17/100
+LJ_P1007=3f0/4817/100
+LJ_P1008=3f0/4917/100
+LJ_P1505=3f0/3f17/100
+LJ_P1505n=3f0/4017/100
+
+case $PRODUCT in
+	$LJ_1000)
+		PRN_FRM=sihp1000.dl
+		PRN_ID=$LJ_1000
+		PRN_NAME="HP LaserJet 1000"
+	;;
+	$LJ_1005)
+		PRN_FRM=sihp1005.dl
+		PRN_ID=$LJ_1005
+		PRN_NAME="HP LaserJet 1005"
+	;;
+	$LJ_1018)
+		PRN_FRM=sihp1018.dl
+		PRN_ID=$LJ_1018
+		PRN_NAME="HP LaserJet 1018"
+	;;
+	$LJ_1020)
+		PRN_FRM=sihp1020.dl
+		PRN_ID=$LJ_1020
+		PRN_NAME="HP LaserJet 1020"
+	;;
+	$LJ_1022)
+		PRN_FRM=sihp1020.dl
+		PRN_ID=$LJ_1020
+		PRN_NAME="HP LaserJet 1022"
+	;;
+	$LJ_1022n)
+		PRN_FRM=sihp1020.dl
+		PRN_ID=$LJ_1022n
+		PRN_NAME="HP LaserJet 1022n"
+	;;
+	$LJ_1022nw)
+		PRN_FRM=sihp1020.dl
+		PRN_ID=$LJ_1022nw
+		PRN_NAME="HP LaserJet 1022nw"
+	;;
+	$LJ_P1005)
+		PRN_FRM=sihpP1005.dl
+		PRN_ID=$LJ_P1005
+		PRN_NAME="HP LaserJet P1005"
+	;;
+	$LJ_P1006)
+		PRN_FRM=sihpP1006.dl
+		PRN_ID=$LJ_P1006
+		PRN_NAME="HP LaserJet P1006"
+	;;
+	$LJ_P1007)
+		PRN_FRM=sihpP1007.dl
+		PRN_ID=$LJ_P1007
+		PRN_NAME="HP LaserJet P1007"
+	;;
+	$LJ_P1008)
+		PRN_FRM=sihpP1008.dl
+		PRN_ID=$LJ_P1008
+		PRN_NAME="HP LaserJet P1008"
+	;;
+	$LJ_P1505)
+		PRN_FRM=sihpP1505.dl
+		PRN_ID=$LJ_P1505
+		PRN_NAME="HP LaserJet P1505"
+	;;
+	$LJ_P1505n)
+		PRN_FRM=sihpP1505.dl
+		PRN_ID=$LJ_P1505n
+		PRN_NAME="HP LaserJet P1505n"
+	;;
+esac
+
+
+if [ "$PRODUCT" = "$PRN_ID" -a "$ACTION" = "add" -a "$DEVTYPE" = "usb_interface" ]; then
+   echo "$(date): STARTING" > $LOGFILE
+   for i in $(seq 30); do
+       echo "$(date): Attempt number $i on $DEVICE" >> $LOGFILE
+       if [ -c $DEVICE ]; then
+          echo "$(date): Device $DEVICE found." >> $LOGFILE
+          if [ -z "`usb_printerid $DEVICE | grep FWVER`" ]; then
+              echo "$(date): No firmware found on $DEVICE" >> $LOGFILE
+              echo "$(date): Sending firmware to printer…" >> $LOGFILE
+              cat $FRM_CAT$PRN_FRM > $DEVICE
+              echo "$(date): done." >> $LOGFILE
+          else
+              echo "$(date): Firmware already there on $DEVICE" >> $LOGFILE
+          fi
+          echo "$(date): EXITING" >> $LOGFILE
+          exit
+       fi
+       sleep 1
+    done
+fi
